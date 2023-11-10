@@ -16,7 +16,7 @@ model User {
   updatedAt DateTime @updatedAt
   name      String   @db.VarChar(50)
   username  String   @db.VarChar(50)
-  password  String   @db.VarChar(50)
+  password  String   @db.VarChar(200)
   Git       Git?
 }
 
