@@ -62,11 +62,16 @@ export class GitController{
             headers: {'Cookie': cookie}
           })
             .then(async function (response) {
-                //console.log(response.data);
+                console.log(response.data);
               //res.json(response.data);
               const data = response.data
+              const gitToken = data.token;
+              const userID = user.id;
+              const gitUsername = data.data.login;
               try{
-                const newGithub = await gitModel.createNewGitAccount(data.token, user.id, data.data.login);
+                const newGithub = await gitModel.createNewGitAccount(gitToken, userID, gitUsername);
+                const mediaRepo =  await repositoryManagement.createRepository(gitToken, gitUsername);
+                return res.json(mediaRepo);
                 return res.json({"status": 'ok', "message": "Done add Github for user", "userID": user.id, "Github:": newGithub});
               }catch(error: any){
                 throw new Error(error.message);
@@ -78,13 +83,17 @@ export class GitController{
             )
     }
 
-    async GetRepository(req: any, res: any, next: any){
-      console.log(req.query.repo);
-      
-      const gitAccount= await gitModel.getGitAccount(req.user.id);
-      const repo = await repositoryManagement.getRepositories(gitAccount.GitToken, gitAccount.username, req.query.repo);
-      console.log(gitAccount);
-      
+    async GetAllContents(req: any, res: any, next: any){
+      console.log(req.query.repo);    
+      try {
+        const gitAccount= await gitModel.getGitAccount(req.user.id);
+        const contents = await repositoryManagement.getAllContents(gitAccount.GitToken, gitAccount.username, req.query.repo);
+        console.log(gitAccount);
+        res.json(contents); 
+      } catch (error: any) {
+        res.json({"status": 'error', "message":error.message});
+      }
+
     }
 }
 //https://github.com/login/oauth/authorize?client_id=5acc84ab634bf2e8f1bc

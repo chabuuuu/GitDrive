@@ -6,7 +6,7 @@ const router = express.Router();
 const client_id = process.env.GIT_CLIENT_ID;
 router.get('/callback', gitController.LoginCallback)
 router.get('/login', authenticateJWT, gitController.Login)
-router.get('/get-repo', authenticateJWT, gitController.GetRepository)
+router.get('/get-resources', authenticateJWT, gitController.GetAllContents)
 router.get('/', (req: any, res: any) => {
     res.redirect(`https://github.com/login/oauth/authorize?client_id=${client_id}`);
 })
