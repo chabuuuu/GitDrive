@@ -17,6 +17,17 @@ export class GitModel{
             
             throw new Error(error.message)
         }
-
+    }
+    async getGitAccount(userID:number){
+        try {
+            const res: any = await prisma.git.findFirst({
+                where: {
+                    userId: userID,
+                }
+            })
+            return res;
+        } catch (error: any) {
+            throw new Error(error.message);
+        }
     }
 }

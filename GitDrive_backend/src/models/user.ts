@@ -18,4 +18,20 @@ export class UserModel{
         }
 
     }
+    async findByUsername(username: string){
+        try{
+            const user: any = await prisma.user.findFirstOrThrow(
+                {
+                    where: 
+                    {
+                        username: username
+                    }
+                },
+            );
+            return user;
+        }
+        catch(error: any){
+            throw new Error(error.message)
+        }
+    }
 }

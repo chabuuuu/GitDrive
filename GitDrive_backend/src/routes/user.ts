@@ -4,5 +4,6 @@ const express = require('express');
 const router = express.Router();
 const client_id = process.env.GIT_CLIENT_ID;
 router.get('/register', userController.Register)
+router.get('/login', userController.login)
 
 module.exports = router;

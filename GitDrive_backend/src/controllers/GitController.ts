@@ -1,9 +1,11 @@
 import 'dotenv/config'
 import { GitModel } from '../models/git';
+import { RepositoryManagement } from '../service/RepositoryManagement.service';
 const clientID = process.env.GIT_CLIENT_ID;
 const clientSecret = process.env.GIT_CLIENT_SECRET;
 const gitModel = new GitModel();
-const axios = require('axios')
+const repositoryManagement = new RepositoryManagement();
+import axios from 'axios';
 const { Octokit } = require("@octokit/rest");
 export class GitController{
     async LoginCallback (req: any, res: any) {
@@ -42,14 +44,47 @@ export class GitController{
                 //     }
                 // })
                     // console.log(data);
-                    await gitModel.createNewGitAccount(access_token, userID, resp.data.login);
-                    return res.json({"status": 'ok', "data": resp.data, "token": access_token, "userID": req.query.id});
+                    //await gitModel.createNewGitAccount(access_token, userID, resp.data.login);
+                    return res.json({"status": 'ok', "data": resp.data, "token": access_token});
                 }
     
         } catch (error: any) {
             console.error(error.message);
             return error.message;
         }
+    }
+    async Login(req: any, res: any, next: any){
+        const cookie = req.header('Cookie');
+        const user = req.user;
+        axios({
+            method: 'get',
+            url: `https://github.com/login/oauth/authorize?client_id=${clientID}&scope=repo`,
+            headers: {'Cookie': cookie}
+          })
+            .then(async function (response) {
+                //console.log(response.data);
+              //res.json(response.data);
+              const data = response.data
+              try{
+                const newGithub = await gitModel.createNewGitAccount(data.token, user.id, data.data.login);
+                return res.json({"status": 'ok', "message": "Done add Github for user", "userID": user.id, "Github:": newGithub});
+              }catch(error: any){
+                throw new Error(error.message);
+              }
+            }).catch(function (error) 
+              {
+              res.json({"status": 'error', "message":error.message});
+              }
+            )
+    }
+
+    async GetRepository(req: any, res: any, next: any){
+      console.log(req.query.repo);
+      
+      const gitAccount= await gitModel.getGitAccount(req.user.id);
+      const repo = await repositoryManagement.getRepositories(gitAccount.GitToken, gitAccount.username, req.query.repo);
+      console.log(gitAccount);
+      
     }
 }
 //https://github.com/login/oauth/authorize?client_id=5acc84ab634bf2e8f1bc
